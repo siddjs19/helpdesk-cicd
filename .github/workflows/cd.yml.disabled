@@ -76,7 +76,7 @@ jobs:
             BUILD_TIME=${{ github.event.repository.updated_at }}
 
       - name: Scan the published image
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ env.REGISTRY }}/${{ github.repository }}:${{ steps.meta.outputs.version }}
           severity: CRITICAL
