@@ -16,7 +16,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /build
 COPY requirements.txt ./
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --no-cache-dir --requirement requirements.txt
 
 
 FROM python:${PYTHON_VERSION}-slim AS runtime
