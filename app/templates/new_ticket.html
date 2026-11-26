@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Raise a ticket · Campus IT Helpdesk{% endblock %}
+{% block heading %}Raise a ticket{% endblock %}
+{% block subheading %}Describe the problem once — the IT desk triages it against your chosen priority.{% endblock %}
+
+{% block content %}
+<section class="card card-form">
+  <form method="post" action="{{ url_for('views.create_ticket') }}" class="stack" id="ticket-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <label>
+      Title
+      <input type="text" name="title" required minlength="5" maxlength="120"
+             value="{{ form.title|default('') }}" placeholder="e.g. Projector in CS-204 shows no signal">
+      <span class="hint">5–120 characters. Say what is broken and where.</span>
+    </label>
+
+    <div class="field-row">
+      <label>
+        Category
+        <select name="category" required>
+          <option value="" disabled {{ 'selected' if not form.category }}>Select a category</option>
+          {% for c in categories %}
+          <option value="{{ c }}" {{ 'selected' if form.category == c }}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Location
+        <input type="text" name="location" maxlength="80" value="{{ form.location|default('') }}" placeholder="Room, lab or 'Online'">
+      </label>
+    </div>
+
+    <fieldset class="priority-group">
+      <legend>Priority</legend>
+      {% for p in priorities %}
+      <label class="priority-card prio-card-{{ p|lower }}">
+        <input type="radio" name="priority" value="{{ p }}" {{ 'checked' if (form.priority or 'Medium') == p }} required>
+        <span class="priority-name">{{ p }}</span>
+        <span class="priority-sla">SLA {{ {'Critical': 4, 'High': 8, 'Medium': 24, 'Low': 72}[p] }} h</span>
+      </label>
+      {% endfor %}
+    </fieldset>
+
+    <label>
+      Description
+      <textarea name="description" rows="6" required minlength="10" maxlength="2000"
+                placeholder="What exactly happens? Any error message? How many people are affected?">{{ form.description|default('') }}</textarea>
+      <span class="hint">At least 10 characters. More detail means a faster fix.</span>
+    </label>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Submit ticket</button>
+      <a class="btn btn-ghost" href="{{ url_for('views.tickets') }}">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

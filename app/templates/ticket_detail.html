@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge, priority_badge, sla_pill %}
+
+{% block title %}{{ ticket.id }} · {{ ticket.title }}{% endblock %}
+{% block heading %}{{ ticket.title }}{% endblock %}
+{% block subheading %}
+  <span class="mono">{{ ticket.id }}</span> · {{ ticket.category }}{% if ticket.location %} · {{ ticket.location }}{% endif %}
+{% endblock %}
+{% block actions %}
+  <a class="btn btn-ghost" href="{{ url_for('views.tickets') }}">Back to tickets</a>
+{% endblock %}
+
+{% block content %}
+<div class="grid-detail">
+  <div class="stack-lg">
+    <section class="card">
+      <div class="card-head">
+        <h2>Description</h2>
+        <div class="badge-row">{{ priority_badge(ticket.priority) }}{{ status_badge(ticket.status) }}{{ sla_pill(ticket.sla_state) }}</div>
+      </div>
+      <p class="description">{{ ticket.description }}</p>
+      <dl class="meta-grid">
+        <div><dt>Raised by</dt><dd>{{ payload.requester.name if payload.requester }}</dd></div>
+        <div><dt>Raised at</dt><dd>{{ ticket.created_at.strftime('%d %b %Y, %H:%M') }} UTC</dd></div>
+        <div><dt>Age</dt><dd>{{ ticket.age_hours() }} h (SLA {{ ticket.sla_hours }} h)</dd></div>
+        <div><dt>Assigned to</dt><dd>{{ payload.assignee.name if payload.assignee else 'Unassigned' }}</dd></div>
+        {% if ticket.resolved_at %}
+        <div><dt>Resolved at</dt><dd>{{ ticket.resolved_at.strftime('%d %b %Y, %H:%M') }} UTC</dd></div>
+        <div><dt>Time to resolve</dt><dd>{{ ticket.resolution_hours() }} h</dd></div>
+        {% endif %}
+      </dl>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><h2>Conversation</h2><span class="muted">{{ payload.comments|length }} message(s)</span></div>
+      <ul class="comments">
+        {% for c in payload.comments %}
+        <li>
+          <div class="comment-head">
+            <strong>{{ c.author }}</strong>
+            <span class="badge role-{{ c.author_role }}">{{ c.author_role }}</span>
+            {% if c.internal %}<span class="pill pill-internal">internal</span>{% endif %}
+            <span class="muted small">{{ c.created_at[:16]|replace('T', ' ') }} UTC</span>
+          </div>
+          <p>{{ c.body }}</p>
+        </li>
+        {% else %}
+        <li class="empty">No comments yet. Technicians usually reply within the SLA window.</li>
+        {% endfor %}
+      </ul>
+
+      {% if ticket.status != 'Closed' %}
+      <form method="post" action="{{ url_for('views.add_comment', ticket_id=ticket.id) }}" class="stack">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>
+          Add a comment
+          <textarea name="body" rows="3" placeholder="Share an update or ask a question" required minlength="2" maxlength="1000"></textarea>
+        </label>
+        {% if current_user.role in ('admin', 'technician') %}
+        <label class="check"><input type="checkbox" name="internal" value="1"> Internal note (staff only)</label>
+        {% endif %}
+        <button type="submit" class="btn btn-primary">Post comment</button>
+      </form>
+      {% else %}
+      <p class="muted">This ticket is closed. Reopen it to continue the conversation.</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <details>
+        <summary>Activity history ({{ ticket.history|length }})</summary>
+        <ul class="timeline">
+          {% for event in ticket.history|reverse %}
+          <li>
+            <span class="muted small mono">{{ event.at[:16]|replace('T', ' ') }}</span>
+            <strong>{{ event.actor }}</strong> — {{ event.detail }}
+          </li>
+          {% endfor %}
+        </ul>
+      </details>
+    </section>
+  </div>
+
+  <aside class="stack-lg">
+    {% if allowed %}
+    <section class="card">
+      <div class="card-head"><h2>Change status</h2></div>
+      <div class="stack">
+        {% for next_status in allowed %}
+        <form method="post" action="{{ url_for('views.change_status', ticket_id=ticket.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="status" value="{{ next_status }}">
+          <button type="submit" class="btn btn-block {{ 'btn-primary' if next_status == 'Resolved' }}">Mark {{ next_status }}</button>
+        </form>
+        {% endfor %}
+      </div>
+      <p class="muted small">Allowed from <strong>{{ ticket.status }}</strong>: {{ allowed|join(', ') }}.</p>
+    </section>
+    {% endif %}
+
+    {% if current_user.role in ('admin', 'technician') %}
+    <section class="card">
+      <div class="card-head"><h2>Assign technician</h2></div>
+      <form method="post" action="{{ url_for('views.assign_ticket', ticket_id=ticket.id) }}" class="stack">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <select name="assignee_id">
+          <option value="">Unassigned</option>
+          {% for tech in technicians %}
+          <option value="{{ tech.id }}" {{ 'selected' if ticket.assignee_id == tech.id }}>{{ tech.name }} ({{ tech.role }})</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary btn-block">Save assignment</button>
+      </form>
+    </section>
+    {% endif %}
+
+    <section class="card">
+      <div class="card-head"><h2>SLA</h2></div>
+      <p class="sla-big">{{ ticket.sla_hours }}<span class="unit">h target</span></p>
+      <p class="muted small">Priority <strong>{{ ticket.priority }}</strong> tickets must be resolved within {{ ticket.sla_hours }} hours of being raised.</p>
+      {{ sla_pill(ticket.sla_state) }}
+    </section>
+  </aside>
+</div>
+{% endblock %}

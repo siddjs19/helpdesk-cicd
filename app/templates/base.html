@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Campus IT Helpdesk{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">IT</span>
+      <div>
+        <strong>Campus Helpdesk</strong>
+        <small>Issue Management</small>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="{{ url_for('views.dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'views.dashboard' }}">
+        Dashboard
+      </a>
+      <a href="{{ url_for('views.tickets') }}" class="nav-link {{ 'active' if request.endpoint == 'views.tickets' }}">
+        All tickets {% if nav_counts.open %}<span class="nav-count">{{ nav_counts.open }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('views.new_ticket') }}" class="nav-link {{ 'active' if request.endpoint == 'views.new_ticket' }}">
+        Raise a ticket
+      </a>
+      {% if current_user.role in ('admin', 'technician') %}
+      <a href="{{ url_for('views.tickets', mine=1) }}" class="nav-link">
+        My queue {% if nav_counts.mine %}<span class="nav-count">{{ nav_counts.mine }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('views.analytics') }}" class="nav-link {{ 'active' if request.endpoint == 'views.analytics' }}">
+        Analytics
+      </a>
+      {% endif %}
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="user-chip">
+        <span class="avatar">{{ current_user.initials }}</span>
+        <div>
+          <strong>{{ current_user.name }}</strong>
+          <small>{{ current_user.role|capitalize }} · {{ current_user.department }}</small>
+        </div>
+      </div>
+      <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-ghost btn-sm">Sign out</button>
+      </form>
+      <p class="env-note">v{{ app_version }} · {{ environment }} · demo data</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1>{% block heading %}Dashboard{% endblock %}</h1>
+        <p class="sub">{% block subheading %}{% endblock %}</p>
+      </div>
+      <div class="topbar-actions">{% block actions %}{% endblock %}</div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

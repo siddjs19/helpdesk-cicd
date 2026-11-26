@@ -1,0 +1,326 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Aarav Sharma",
+      "email": "aarav@campus.edu",
+      "role": "student",
+      "department": "Computer Engineering"
+    },
+    {
+      "id": 2,
+      "name": "Priya Nair",
+      "email": "priya@campus.edu",
+      "role": "student",
+      "department": "Information Technology"
+    },
+    {
+      "id": 3,
+      "name": "Dr. Meera Iyer",
+      "email": "meera@campus.edu",
+      "role": "faculty",
+      "department": "Physics"
+    },
+    {
+      "id": 4,
+      "name": "Rohan Gupta",
+      "email": "rohan@campus.edu",
+      "role": "faculty",
+      "department": "Commerce"
+    },
+    {
+      "id": 5,
+      "name": "Kabir Rao",
+      "email": "kabir@campus.edu",
+      "role": "technician",
+      "department": "IT Support"
+    },
+    {
+      "id": 6,
+      "name": "Sneha Patil",
+      "email": "sneha@campus.edu",
+      "role": "technician",
+      "department": "IT Support"
+    },
+    {
+      "id": 7,
+      "name": "Imran Sheikh",
+      "email": "imran@campus.edu",
+      "role": "technician",
+      "department": "Network Team"
+    },
+    {
+      "id": 8,
+      "name": "Ananya Deshmukh",
+      "email": "ananya@campus.edu",
+      "role": "admin",
+      "department": "IT Department"
+    }
+  ],
+  "tickets": [
+    {
+      "title": "Wi-Fi keeps disconnecting in Library Block B",
+      "description": "Connection drops every 5-10 minutes on the second floor of Library Block B. Affects all devices on the student SSID.",
+      "category": "Wi-Fi / Network",
+      "priority": "High",
+      "status": "In Progress",
+      "requester_id": 1,
+      "assignee_id": 7,
+      "location": "Library, Block B",
+      "age_hours": 6,
+      "comments": [
+        {
+          "author_id": 7,
+          "body": "Checking the access point logs now, will update in 30 minutes.",
+          "after_hours": 2
+        }
+      ]
+    },
+    {
+      "title": "Projector in CS-204 not displaying HDMI input",
+      "description": "The projector powers on but shows 'no signal' for both HDMI ports. Practical session scheduled tomorrow morning.",
+      "category": "Projector / AV",
+      "priority": "High",
+      "status": "Open",
+      "requester_id": 3,
+      "location": "CS-204",
+      "age_hours": 3
+    },
+    {
+      "title": "Cannot log in to student ERP portal",
+      "description": "Password reset email never arrives and the account is locked after three attempts. Fee payment is pending.",
+      "category": "Account / Access",
+      "priority": "Critical",
+      "status": "In Progress",
+      "requester_id": 2,
+      "assignee_id": 5,
+      "location": "Online",
+      "age_hours": 5,
+      "comments": [
+        {
+          "author_id": 5,
+          "body": "Account unlocked, reset link sent to the alternate email on file.",
+          "after_hours": 3
+        }
+      ]
+    },
+    {
+      "title": "Lab PC-17 restarts randomly during practicals",
+      "description": "Machine reboots without warning roughly every 20 minutes. Suspected power supply or thermal issue.",
+      "category": "Computer / Lab",
+      "priority": "Medium",
+      "status": "In Progress",
+      "requester_id": 1,
+      "assignee_id": 6,
+      "location": "Computer Lab 3",
+      "age_hours": 26
+    },
+    {
+      "title": "MATLAB license expired on department machines",
+      "description": "All 30 machines in the Mechanical Lab show a license expired dialog. Coursework submission is next week.",
+      "category": "Software / License",
+      "priority": "High",
+      "status": "Resolved",
+      "requester_id": 4,
+      "assignee_id": 6,
+      "location": "Mechanical Lab",
+      "age_hours": 30,
+      "resolved_age_hours": 12,
+      "comments": [
+        {
+          "author_id": 6,
+          "body": "Campus license renewed and reactivated on all 30 machines.",
+          "after_hours": 16
+        }
+      ]
+    },
+    {
+      "title": "Printer on 2nd floor jams every print job",
+      "description": "Paper feeds at an angle and jams. Three students reported the same issue this week.",
+      "category": "Printer / Scanner",
+      "priority": "Low",
+      "status": "Open",
+      "requester_id": 2,
+      "location": "Admin Block, 2nd floor",
+      "age_hours": 96
+    },
+    {
+      "title": "Slow internet in Hostel C rooms",
+      "description": "Speeds under 1 Mbps in the evening. Online classes are impossible from the room.",
+      "category": "Wi-Fi / Network",
+      "priority": "Medium",
+      "status": "Resolved",
+      "requester_id": 1,
+      "assignee_id": 7,
+      "location": "Hostel C",
+      "age_hours": 50,
+      "resolved_age_hours": 20
+    },
+    {
+      "title": "Smart classroom mic not working",
+      "description": "Ceiling microphone is not picked up by the lecture capture system. Guest lecture scheduled today.",
+      "category": "Projector / AV",
+      "priority": "Critical",
+      "status": "Resolved",
+      "requester_id": 3,
+      "assignee_id": 5,
+      "location": "Smart Classroom 1",
+      "age_hours": 20,
+      "resolved_age_hours": 2
+    },
+    {
+      "title": "Need SPSS installed for statistics lab",
+      "description": "SPSS is required for the third-year statistics practical batch starting next month.",
+      "category": "Software / License",
+      "priority": "Low",
+      "status": "Closed",
+      "requester_id": 4,
+      "assignee_id": 6,
+      "location": "Statistics Lab",
+      "age_hours": 200,
+      "resolved_age_hours": 60
+    },
+    {
+      "title": "Forgot ERP password, reset link not arriving",
+      "description": "Reset email is not delivered to the registered address, possibly filtered by the college spam gateway.",
+      "category": "Account / Access",
+      "priority": "Medium",
+      "status": "Resolved",
+      "requester_id": 2,
+      "assignee_id": 8,
+      "location": "Online",
+      "age_hours": 40,
+      "resolved_age_hours": 6
+    },
+    {
+      "title": "Wi-Fi authentication fails for new faculty accounts",
+      "description": "Faculty joining this semester get an 'authentication failed' error on the staff SSID. At least six people affected.",
+      "category": "Wi-Fi / Network",
+      "priority": "High",
+      "status": "In Progress",
+      "requester_id": 4,
+      "assignee_id": 7,
+      "location": "Faculty Block A",
+      "age_hours": 30
+    },
+    {
+      "title": "Scanner in exam cell produces blank pages",
+      "description": "Flatbed scanner returns blank sheets while the preview looks correct. Needed for question paper digitisation.",
+      "category": "Printer / Scanner",
+      "priority": "Medium",
+      "status": "Open",
+      "requester_id": 3,
+      "location": "Exam Cell",
+      "age_hours": 20
+    },
+    {
+      "title": "Projector remote missing in Seminar Hall",
+      "description": "Remote has been missing since the workshop last Friday. Projector works only from the wall switch.",
+      "category": "Projector / AV",
+      "priority": "Low",
+      "status": "Open",
+      "requester_id": 1,
+      "location": "Seminar Hall",
+      "age_hours": 140
+    },
+    {
+      "title": "Adobe Creative Cloud login loop on design lab PCs",
+      "description": "After sign-in the application returns to the login screen. Six design lab machines affected.",
+      "category": "Software / License",
+      "priority": "Medium",
+      "status": "Resolved",
+      "requester_id": 1,
+      "assignee_id": 5,
+      "location": "Design Lab",
+      "age_hours": 70,
+      "resolved_age_hours": 15
+    },
+    {
+      "title": "Desktop in reception will not boot",
+      "description": "Machine shows a blinking cursor after POST. Visitor registration desk is unusable.",
+      "category": "Computer / Lab",
+      "priority": "Critical",
+      "status": "Open",
+      "requester_id": 4,
+      "location": "Reception",
+      "age_hours": 9
+    },
+    {
+      "title": "Wi-Fi drops during online exam in Room 301",
+      "description": "Repeated disconnections during the proctored exam window. Thirty students were affected mid-test.",
+      "category": "Wi-Fi / Network",
+      "priority": "Critical",
+      "status": "Resolved",
+      "requester_id": 3,
+      "assignee_id": 7,
+      "location": "Room 301",
+      "age_hours": 60,
+      "resolved_age_hours": 4
+    },
+    {
+      "title": "Guest Wi-Fi access for campus visit",
+      "description": "Temporary guest credentials needed for 25 delegates attending the industry visit.",
+      "category": "Wi-Fi / Network",
+      "priority": "Low",
+      "status": "Closed",
+      "requester_id": 4,
+      "assignee_id": 8,
+      "location": "Admin Block",
+      "age_hours": 300,
+      "resolved_age_hours": 100
+    },
+    {
+      "title": "Lab headphones not detected on 4 machines",
+      "description": "Front panel audio jack does not detect headphones on machines 4, 7, 9 and 12 in the language lab.",
+      "category": "Computer / Lab",
+      "priority": "Low",
+      "status": "Open",
+      "requester_id": 1,
+      "location": "Language Lab",
+      "age_hours": 60
+    },
+    {
+      "title": "Turnitin similarity report not generating",
+      "description": "Reports stay in 'pending' state for more than a day for all submissions this week.",
+      "category": "Software / License",
+      "priority": "Medium",
+      "status": "In Progress",
+      "requester_id": 3,
+      "assignee_id": 6,
+      "location": "Online",
+      "age_hours": 18
+    },
+    {
+      "title": "CCTV monitoring PC needs antivirus update",
+      "description": "The security cabin machine has not received definition updates for two months.",
+      "category": "Computer / Lab",
+      "priority": "Medium",
+      "status": "Resolved",
+      "requester_id": 4,
+      "assignee_id": 5,
+      "location": "Security Room",
+      "age_hours": 90,
+      "resolved_age_hours": 30
+    },
+    {
+      "title": "Projector bulb flickering in EC-102",
+      "description": "Flickering during presentations, likely end of bulb life. Replacement bulb may be needed.",
+      "category": "Projector / AV",
+      "priority": "Medium",
+      "status": "Open",
+      "requester_id": 2,
+      "location": "EC-102",
+      "age_hours": 12
+    },
+    {
+      "title": "ERP timetable shows wrong section",
+      "description": "Timetable for semester 5 displays the division B schedule for division A students.",
+      "category": "Account / Access",
+      "priority": "High",
+      "status": "Open",
+      "requester_id": 2,
+      "location": "Online",
+      "age_hours": 8
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{% macro status_badge(status) -%}
+<span class="badge status-{{ status|lower|replace(' ', '-') }}">{{ status }}</span>
+{%- endmacro %}
+
+{% macro priority_badge(priority) -%}
+<span class="badge prio-{{ priority|lower }}">{{ priority }}</span>
+{%- endmacro %}
+
+{% macro sla_pill(state) -%}
+<span class="pill sla-{{ state }}">
+  {%- if state == 'met' -%}SLA met
+  {%- elif state == 'breached' -%}SLA breached
+  {%- elif state == 'at-risk' -%}SLA at risk
+  {%- elif state == 'on-track' -%}On track
+  {%- else -%}n/a{%- endif -%}
+</span>
+{%- endmacro %}
+
+{% macro ticket_table(tickets, show_requester=True) -%}
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Ticket</th>
+        <th>Category</th>
+        <th>Priority</th>
+        <th>Status</th>
+        {% if show_requester %}<th>Requester</th>{% endif %}
+        <th>Assignee</th>
+        <th>Age</th>
+        <th>SLA</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in tickets %}
+      <tr>
+        <td>
+          <a class="ticket-link" href="{{ url_for('views.ticket_detail', ticket_id=t.id) }}">{{ t.title }}</a>
+          <div class="muted mono">{{ t.id }}{% if t.location %} · {{ t.location }}{% endif %}</div>
+        </td>
+        <td class="muted">{{ t.category }}</td>
+        <td>{{ priority_badge(t.priority) }}</td>
+        <td>{{ status_badge(t.status) }}</td>
+        {% if show_requester %}<td class="muted">{{ t.requester.name if t.requester else '—' }}</td>{% endif %}
+        <td class="muted">{{ t.assignee.name if t.assignee else 'Unassigned' }}</td>
+        <td class="muted">{{ t.age_hours()|round(0, 'floor')|int }}h</td>
+        <td>{{ sla_pill(t.sla_state) }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8" class="empty">No tickets match this view.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{%- endmacro %}

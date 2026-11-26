@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% from "_macros.html" import ticket_table %}
+
+{% block title %}Dashboard · Campus IT Helpdesk{% endblock %}
+{% block heading %}Good to see you, {{ current_user.name.split(' ')[0] }}{% endblock %}
+{% block subheading %}
+  {{ stats.totals.open }} open · {{ stats.totals.in_progress }} in progress · {{ stats.totals.unassigned }} unassigned
+{% endblock %}
+{% block actions %}
+  <a class="btn btn-primary" href="{{ url_for('views.new_ticket') }}">Raise a ticket</a>
+{% endblock %}
+
+{% block content %}
+<section class="stat-grid">
+  <article class="card stat">
+    <p class="stat-label">Open</p>
+    <p class="stat-value">{{ stats.totals.open }}</p>
+    <p class="stat-foot">awaiting triage</p>
+  </article>
+  <article class="card stat">
+    <p class="stat-label">In progress</p>
+    <p class="stat-value">{{ stats.totals.in_progress }}</p>
+    <p class="stat-foot">with technicians</p>
+  </article>
+  <article class="card stat {{ 'stat-alert' if stats.totals.sla_breached_open }}">
+    <p class="stat-label">Past SLA</p>
+    <p class="stat-value">{{ stats.totals.sla_breached_open }}</p>
+    <p class="stat-foot">open beyond target</p>
+  </article>
+  <article class="card stat">
+    <p class="stat-label">Avg. resolution</p>
+    <p class="stat-value">{{ stats.resolution.avg_hours }}<span class="unit">h</span></p>
+    <p class="stat-foot">{{ stats.resolution.sla_compliance_pct }}% inside SLA</p>
+  </article>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <div class="card-head">
+      <h2>Recent tickets</h2>
+      <a class="link" href="{{ url_for('views.tickets') }}">View all</a>
+    </div>
+    {{ ticket_table(recent) }}
+  </section>
+
+  <div class="stack-lg">
+    {% if current_user.role in ('admin', 'technician') %}
+    <section class="card">
+      <div class="card-head">
+        <h2>My queue</h2>
+        <span class="muted">{{ my_queue|length }} assigned</span>
+      </div>
+      <ul class="queue">
+        {% for t in my_queue[:6] %}
+        <li>
+          <a href="{{ url_for('views.ticket_detail', ticket_id=t.id) }}">{{ t.title }}</a>
+          <span class="muted mono">{{ t.priority }} · {{ t.age_hours()|round(0, 'floor')|int }}h</span>
+        </li>
+        {% else %}
+        <li class="empty">Nothing assigned to you right now.</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Unassigned</h2>
+        <span class="muted">{{ unassigned|length }} waiting</span>
+      </div>
+      <ul class="queue">
+        {% for t in unassigned[:6] %}
+        <li>
+          <a href="{{ url_for('views.ticket_detail', ticket_id=t.id) }}">{{ t.title }}</a>
+          <span class="muted mono">{{ t.priority }} · {{ t.category }}</span>
+        </li>
+        {% else %}
+        <li class="empty">Everything is assigned.</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% else %}
+    <section class="card">
+      <div class="card-head"><h2>How it works</h2></div>
+      <ol class="steps">
+        <li><strong>Raise</strong> a ticket with category and priority.</li>
+        <li><strong>Triage</strong> — the IT desk assigns a technician.</li>
+        <li><strong>Track</strong> progress: Open → In Progress → Resolved.</li>
+        <li><strong>Confirm</strong> the fix, or reopen if the problem returns.</li>
+      </ol>
+      <p class="muted small">Your SLA target depends on priority: Critical 4h · High 8h · Medium 24h · Low 72h.</p>
+    </section>
+    {% endif %}
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Top issue categories</h2>
+        <a class="link" href="{{ url_for('views.analytics') }}">Analytics</a>
+      </div>
+      <ul class="bars">
+        {% set max = stats.by_category|map(attribute='count')|max %}
+        {% for row in stats.by_category[:5] %}
+        <li>
+          <span class="bar-label">{{ row.label }}</span>
+          <span class="bar"><span class="bar-fill" style="width: {{ (row.count / max * 100)|round(1) if max else 0 }}%"></span></span>
+          <span class="bar-value">{{ row.count }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+{% endblock %}

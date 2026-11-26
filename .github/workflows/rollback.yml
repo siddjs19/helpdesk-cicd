@@ -1,0 +1,52 @@
+name: Rollback
+
+# Manual escape hatch: re-deploy a previously published image tag.
+# scripts/deploy.sh waits for readiness and reverts again if it fails.
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: Full image reference to roll back to
+        required: true
+        type: string
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options: [staging, production]
+        default: production
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  rollback:
+    name: Roll back ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+    steps:
+      - name: Re-deploy the requested image
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ inputs.environment == 'production' && secrets.PRODUCTION_HOST || secrets.STAGING_HOST }}
+          username: ${{ inputs.environment == 'production' && secrets.PRODUCTION_USER || secrets.STAGING_USER }}
+          key: ${{ inputs.environment == 'production' && secrets.PRODUCTION_SSH_KEY || secrets.STAGING_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -e
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            cd ${{ inputs.environment == 'production' && vars.PRODUCTION_APP_DIR || vars.STAGING_APP_DIR }}
+            bash ./scripts/deploy.sh ${{ inputs.image }}
+
+      - name: Summary
+        run: |
+          {
+            echo "### Rollback"
+            echo ""
+            echo "- Environment: ${{ inputs.environment }}"
+            echo "- Image: \`${{ inputs.image }}\`"
+            echo "- Triggered by: @${{ github.actor }}"
+          } >> "$GITHUB_STEP_SUMMARY"

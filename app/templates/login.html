@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Sign in · Campus IT Helpdesk{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-body">
+  <div class="auth-grid">
+    <section class="auth-hero">
+      <div class="brand brand-lg">
+        <span class="brand-mark">IT</span>
+        <div>
+          <strong>Campus IT Helpdesk</strong>
+          <small>Report · Assign · Track · Resolve</small>
+        </div>
+      </div>
+      <h2>One desk for every campus IT problem.</h2>
+      <p>Wi-Fi drops, dead projectors, expired licences, locked accounts — students and faculty raise a ticket once and follow it to closure.</p>
+      <ul class="hero-points">
+        <li>Priority-based SLA tracking on every ticket</li>
+        <li>Admin dashboard with technician workload</li>
+        <li>Analytics on the most frequent campus issues</li>
+      </ul>
+      <p class="hero-foot">Demo build · in-memory data store · no database required</p>
+    </section>
+
+    <section class="auth-card">
+      <h1>Sign in</h1>
+      <p class="muted">Use any demo account below — the password is <code>{{ demo_password }}</code>.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="post" action="{{ url_for('auth.login_submit', next=request.args.get('next')) }}" class="stack" id="login-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label>
+          College email
+          <input type="email" name="email" id="email" value="{{ email|default('') }}" placeholder="aarav@campus.edu" required autofocus>
+        </label>
+        <label>
+          Password
+          <input type="password" name="password" id="password" value="{{ demo_password }}" required>
+        </label>
+        <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+      </form>
+
+      <p class="demo-title">Demo accounts</p>
+      <div class="demo-list">
+        {% for u in demo_users %}
+        <button type="button" class="demo-row" data-email="{{ u.email }}">
+          <span class="avatar avatar-sm">{{ u.initials }}</span>
+          <span class="demo-name">{{ u.name }}</span>
+          <span class="badge role-{{ u.role }}">{{ u.role }}</span>
+        </button>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

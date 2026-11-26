@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics · Campus IT Helpdesk{% endblock %}
+{% block heading %}Analytics{% endblock %}
+{% block subheading %}Where campus IT time actually goes — computed live from the in-memory demo dataset.{% endblock %}
+
+{% block content %}
+<section class="stat-grid">
+  <article class="card stat">
+    <p class="stat-label">Total tickets</p>
+    <p class="stat-value">{{ stats.totals.all }}</p>
+    <p class="stat-foot">demo dataset</p>
+  </article>
+  <article class="card stat">
+    <p class="stat-label">Avg. resolution</p>
+    <p class="stat-value">{{ stats.resolution.avg_hours }}<span class="unit">h</span></p>
+    <p class="stat-foot">across {{ stats.resolution.resolved_count }} resolved</p>
+  </article>
+  <article class="card stat">
+    <p class="stat-label">SLA compliance</p>
+    <p class="stat-value">{{ stats.resolution.sla_compliance_pct }}<span class="unit">%</span></p>
+    <p class="stat-foot">resolved inside target</p>
+  </article>
+  <article class="card stat {{ 'stat-alert' if stats.totals.sla_breached_open }}">
+    <p class="stat-label">Open past SLA</p>
+    <p class="stat-value">{{ stats.totals.sla_breached_open }}</p>
+    <p class="stat-foot">needs escalation</p>
+  </article>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <div class="card-head"><h2>Most frequent problems</h2><span class="muted">by category</span></div>
+    <ul class="bars bars-lg">
+      {% set max = stats.by_category|map(attribute='count')|max %}
+      {% for row in stats.by_category %}
+      <li>
+        <span class="bar-label">{{ row.label }}</span>
+        <span class="bar"><span class="bar-fill" style="width: {{ (row.count / max * 100)|round(1) if max else 0 }}%"></span></span>
+        <span class="bar-value">{{ row.count }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Status mix</h2><span class="muted">live</span></div>
+    <ul class="bars bars-lg">
+      {% set maxs = stats.by_status|map(attribute='count')|max %}
+      {% for row in stats.by_status %}
+      <li>
+        <span class="bar-label">{{ row.label }}</span>
+        <span class="bar"><span class="bar-fill fill-{{ row.label|lower|replace(' ', '-') }}" style="width: {{ (row.count / maxs * 100)|round(1) if maxs else 0 }}%"></span></span>
+        <span class="bar-value">{{ row.count }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    <div class="card-head mt"><h2>Priority mix</h2></div>
+    <ul class="bars">
+      {% set maxp = stats.by_priority|map(attribute='count')|max %}
+      {% for row in stats.by_priority %}
+      <li>
+        <span class="bar-label">{{ row.label }}</span>
+        <span class="bar"><span class="bar-fill fill-prio-{{ row.label|lower }}" style="width: {{ (row.count / maxp * 100)|round(1) if maxp else 0 }}%"></span></span>
+        <span class="bar-value">{{ row.count }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <div class="card-head"><h2>Technician workload</h2><span class="muted">open tickets</span></div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Technician</th><th>Role</th><th>Open</th><th>Critical</th></tr></thead>
+        <tbody>
+          {% for row in stats.workload %}
+          <tr>
+            <td>{{ row.name }}</td>
+            <td class="muted">{{ row.role }}</td>
+            <td>{{ row.open }}</td>
+            <td>{{ row.critical }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Oldest unresolved</h2><span class="muted">ageing</span></div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Ticket</th><th>Priority</th><th>Status</th><th>Age</th></tr></thead>
+        <tbody>
+          {% for row in stats.oldest_open %}
+          <tr>
+            <td><a class="ticket-link" href="{{ url_for('views.ticket_detail', ticket_id=row.id) }}">{{ row.title }}</a></td>
+            <td>{{ row.priority }}</td>
+            <td class="muted">{{ row.status }}</td>
+            <td class="muted">{{ row.age_hours|round(0, 'floor')|int }}h</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
