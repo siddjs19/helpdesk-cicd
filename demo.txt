@@ -1,0 +1,1 @@
+Checking auto-deployment according to version
