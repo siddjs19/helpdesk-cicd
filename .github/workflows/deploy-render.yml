@@ -1,0 +1,84 @@
+name: Deploy to Render
+
+# Render builds the image from this repository, so this workflow does not build
+# or push anything: it triggers a deploy of the tagged commit, waits until that
+# exact commit is live, and then verifies the running service over HTTPS.
+#
+# Use this workflow *or* the SSH jobs in cd.yml — not both.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+concurrency:
+  group: render-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Trigger and verify Render deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: render
+      url: ${{ vars.RENDER_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check configuration
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          URL: ${{ vars.RENDER_URL }}
+        run: |
+          missing=0
+          [ -z "$HOOK" ] && { echo "::error::secret RENDER_DEPLOY_HOOK is not set"; missing=1; }
+          [ -z "$URL" ] && { echo "::error::variable RENDER_URL is not set"; missing=1; }
+          exit "$missing"
+
+      - name: Trigger the deploy
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          code=$(curl -s -o /tmp/hook.out -w '%{http_code}' -X POST "$HOOK")
+          echo "deploy hook responded HTTP $code"
+          case "$code" in
+            200|201|202) echo "deploy queued for ${{ github.sha }}" ;;
+            *) echo "::error::deploy hook failed with HTTP $code"; cat /tmp/hook.out; exit 1 ;;
+          esac
+
+      - name: Wait for this commit to go live
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          RENDER_URL: ${{ vars.RENDER_URL }}
+          MAX_WAIT: "900"
+        run: python3 scripts/wait_for_render.py
+
+      - name: Verify the deployed service
+        env:
+          RENDER_URL: ${{ vars.RENDER_URL }}
+        run: |
+          echo "--- /version"
+          curl -fsS "$RENDER_URL/version"
+          echo "--- /readyz"
+          curl -fsS "$RENDER_URL/readyz"
+
+      - name: Smoke test the public URL
+        env:
+          RENDER_URL: ${{ vars.RENDER_URL }}
+        run: BASE_URL="$RENDER_URL" bash ./scripts/smoke_test.sh
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Render deploy"
+            echo ""
+            echo "- URL: ${{ vars.RENDER_URL }}"
+            echo "- Commit: \`${{ github.sha }}\`"
+            echo "- Ref: \`${{ github.ref_name }}\`"
+            echo "- Result: ${{ job.status }}"
+          } >> "$GITHUB_STEP_SUMMARY"

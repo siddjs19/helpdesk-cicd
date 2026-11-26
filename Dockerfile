@@ -50,15 +50,15 @@ EXPOSE 8000
 
 # Docker/Kubernetes readiness probe — no curl in the slim image.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD python -c "import sys,urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2).status == 200 else 1)"
+    CMD python -c "import os,sys,urllib.request; p=os.environ.get('PORT','8000'); sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:%s/healthz' % p, timeout=2).status == 200 else 1)"
 
-CMD ["gunicorn", \
-     "--bind", "0.0.0.0:8000", \
-     "--workers", "3", \
-     "--threads", "2", \
-     "--timeout", "30", \
-     "--graceful-timeout", "10", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-", \
-     "--log-level", "info", \
-     "wsgi:app"]
+CMD ["sh", "-c", "exec gunicorn \
+     --bind 0.0.0.0:${PORT:-8000} \
+     --workers 3 \
+     --threads 2 \
+     --timeout 30 \
+     --graceful-timeout 10 \
+     --access-logfile - \
+     --error-logfile - \
+     --log-level info \
+     wsgi:app"]
